@@ -32,12 +32,12 @@ Check out `season-2/` for more infos on our current battle system
 
 ## Files
 
-`bot.py` - Main of the discord bot
-`funcs.py` - Helper functions and functions interacting with game environment
-`install.sh` - Bash script to install all packages needed
-`settings.json` - JSON file containing all environment variables
-`setting.py` - Script that loads the environment variables
-`bot.log` - Logfile for discord bot
+- `bot.py` - Main of the discord bot
+- `funcs.py` - Helper functions and functions interacting with game environment
+- `install.sh` - Bash script to install all packages needed
+- `settings.json` - JSON file containing all environment variables
+- `setting.py` - Script that loads the environment variables
+- `bot.log` - Logfile for discord bot
 
 ## Disclaimer
 

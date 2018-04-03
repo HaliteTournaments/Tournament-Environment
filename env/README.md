@@ -27,13 +27,13 @@ To run the game environment simply execute `python3 handler.py`
 
 ## Files
 
-`compilerQueue.txt` - File where a queue for compiling bots is created
-`runQueue.txt` - File where a queue for running bots is created
-`run.txt` - A file with a boolean value to determine if environment is running
-`install.sh` - Install all packages needed to run environment
-`handler.py` - Contains all the code of the environment
-`halite` - Halite binary with our modifications
-`Vagrantfile` - File containing Vagrant VM infos
-`handler.log` - Log file for environment handler
-`out/` - Directory where all outputs from environment is put
-`halite-env/` - Directory with all files to build Halite binary
+- `compilerQueue.txt` - File where a queue for compiling bots is created
+- `runQueue.txt` - File where a queue for running bots is created
+- `run.txt` - A file with a boolean value to determine if environment is running
+- `install.sh` - Install all packages needed to run environment
+- `handler.py` - Contains all the code of the environment
+- `halite` - Halite binary with our modifications
+- `Vagrantfile` - File containing Vagrant VM infos
+- `handler.log` - Log file for environment handler
+- `out/` - Directory where all outputs from environment is put
+- `halite-env/` - Directory with all files to build Halite binary
