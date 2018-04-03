@@ -1,0 +1,33 @@
+**Here are all the specs for the game environment set up for season 2!**
+
+- In every turn you will play **5 matches** against your opponent.
+
+- You will play in **2 small maps, 2 big maps and once in the default size map** every turn.
+
+  The maps are chosen randomly from :
+
+  ```
+    Small :
+      "216", "144" ( -10% size from default )
+      "204", "136" ( -15% size from default )
+      "192", "128" ( -20% size form default )
+
+    Big :
+      "264", "176" ( +10% size from default )
+      "276", "192" ( +15% size from default )
+      "288", "192" ( +20% size form default )
+
+    Default :
+      “240”, “160”```
+
+- The map seed isn't completely random, for every match you play we choose a random one between : **2350513674** - **2350513694** ( 20 different seeds ).
+
+- The goal of these settings is to have **very little rushing**, rewarding the players that can get the planets and choose their strategy properly.
+
+- The number of **planets is increased** and their **resources are limited**, nevertheless there is **regeneration** for ships that are docked ( you might wanna consider creating some function that makes the ship use planets as shelters ).
+
+- The **attack of the ships is lower**, the **range** of the weapon is lower too and the **cool down time** of the weapon has increased.
+
+- Playing in different map sizes hopefully will give a much more fair result of the battles, **rewarding players that can play well in both big and small maps.**
+
+**Here are the constants for the game environment : https://gist.github.com/Splinter0/d5379ba8acda2ac6fbc7284879205fb2**
