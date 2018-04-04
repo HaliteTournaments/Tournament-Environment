@@ -35,7 +35,7 @@ namespace hlt {
         unsigned short BASE_SHIP_HEALTH = 255; //255
         unsigned short DOCKED_SHIP_REGENERATION = 1; //0
 
-        unsigned int WEAPON_COOLDOWN = 1.5; //1
+        unsigned int WEAPON_COOLDOWN = 2; //1
         double WEAPON_RADIUS = 4.0; //5.0
         int WEAPON_DAMAGE = 80; //64
         double EXPLOSION_RADIUS = 25.0; //10.0
