@@ -2,16 +2,19 @@
 	"compileOut": 245,
 	"runOut": 125,
 	"token": "",
-	"admins": [],
+	"admins": [
+		"Splinter#4298",
+		"Frank Whoee#1338"
+	],
 	"timeSub": "APRIL 12 3:30PM GMT",
 	"infos": "season-2/infos.txt",
 	"log": "bot.log",
-	"server": "",
+	"server": "HaliteTournaments",
 	"brackets": "imgs/brackets.png",
-	"submit": true,
+	"submit": false,
 	"season": "2",
-	"onTour": true,
+	"onTour": false,
 	"matches": {},
 	"specs":"season-2/specs.txt",
-	"engineLink":"https://github.com/Splinter0/Halite-Tournaments/tree/master/env/halite-env"
+	"engineLink":"https://github.com/HaliteTournaments/Tournament-Environment/tree/master/env/halite-env"
 }
