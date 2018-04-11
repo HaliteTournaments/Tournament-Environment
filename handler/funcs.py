@@ -13,9 +13,10 @@ languages = {'python': ['py', '', 'python3 MyBot.py'],
  'javascript': ['js', '', 'node MyBot.js'],
  'c++': ['cpp', 'set -e && cmake . && make MyBot', './MyBot'],
  'dart': ['dart', '', 'dart MyBot.dart'],
- 'go': ['go', 'export GOPATH=$(pwd) && go get || go build MyBot.go', './MyBot'],
+ 'go': ['go', 'export GOPATH=$(pwd) && go build MyBot.go', './MyBot'],
  'haskell': ['hs', 'ghc --make MyBot.hs -O -v0 -rtsopts -outputdir dist', './MyBot.exe'],
- 'ruby': ['rb', '', 'ruby MyBot.rb']}
+ 'ruby': ['rb', '', 'ruby MyBot.rb'],
+ 'c#': ['cs', 'xbuild Halite2/Halite2.csproj', 'mono Halite2/bin/Debug/Halite2.exe']}
 
 def log(string):
 
@@ -52,7 +53,8 @@ async def uploadBot(link, username, fileName):
 
     """
     Function that downloads zip file, unzips it,
-    recognize the language used and runs the
+    recognize the language used, stores it into the
+    player in the database and then runs the
     compiler function
     """
 
@@ -85,7 +87,7 @@ async def uploadBot(link, username, fileName):
                 z.close()
 
                 found = False
-                lang = None
+                lang, lib = None, None
                 for f in os.listdir(save):
                     if f.startswith('MyBot.'):
                         for k, v in languages.items():
@@ -93,19 +95,31 @@ async def uploadBot(link, username, fileName):
                                 found = True
                                 lang = v
                                 if f.replace('MyBot.', '') == "py" and os.path.isfile(save+"requirements.txt"):
-                                    pip = os.popen("sudo -H pip3 install -f "+save+"requirements.txt")
+                                    lib = os.popen("cd "+save+" && pip3 install "+save+"requirements.txt").read()
                                 break
+
 
                     elif f.startswith("src"):
                         for s in os.listdir(save+"src/"):
                             if s == "MyBot.go":
                                 lang = languages.get("go")
                                 found = True
+                                lib = os.popen("cd "+save+" && go get").read()
                                 break
                             elif s == "main.rs":
                                 lang = languages.get("rs")
                                 found = True
                                 break
+
+                    elif f.startswith("Halite2"):
+                        for s in os.listdir(save+"Halite2/"):
+                            if s == "Halite2.csproj":
+                                lang = languages.get("c#")
+                                found = True
+                                break
+
+                    if found:
+                        break
 
                 compileLog = ""
                 if lang != None and found:
@@ -114,6 +128,9 @@ async def uploadBot(link, username, fileName):
                     text, compileLog = await compileBot(player)
                     if compileLog != "" :
                         text = "File bot : "+fileName+", "+text
+
+                    if lib != None :
+                        text += "\nHere is output of external libraries installation :\n"+lib
 
                 elif lang != None and not found:
                     text = 'File bot : ' + fileName + ' conatins a bot file but the language : '+ext+' isn\'t supported!'
@@ -131,15 +148,22 @@ async def uploadBot(link, username, fileName):
             return s, ""
 
     else:
-        return "Cannot compile "+filename+", user is already running a battle/match or compiling other code!", ""
+        return "Cannot compile "+fileName+", user is already running a battle/match or compiling other code!", ""
 
 
 async def compileBot(player):
 
     """
-    Function that writes bot name to compilerQueue
-    and waits for output.
+    Function that starts the compiler.
+    player = player object from the database
+    Function gets all the info needed to compile
+    the code of this player from the object and
+    adds it to the queue, then waits for it to
+    be done ( or returns a timeout error ).
+    It returns the result of the compiler and the
+    compiler log.
     """
+
     #clean up logs
     os.system("rm -r "+settings.path+"/../env/out/"+player["username"]+".txt"" > /dev/null 2>&1")
     compileLog = ""
@@ -179,25 +203,24 @@ async def compileBot(player):
             secs += 1
 
     settings.db.queues.delete_one({"_id":queueId})
-    settings.db.player.update_one({"_id":player.get("_id")}, {"$set":{"running":False}}, upsert=True)
+    settings.db.players.update_one({"_id":player.get("_id")}, {"$set":{"running":False}}, upsert=True)
 
     return text, compileLog
 
 async def battle(p1, p2, width, height, official):
 
     """
-    Battle function to interact with the battle
-    enviroment.
-    p1 = player one, string
-    p2 = player two, string
-    height = height of the map of game, string
-    width = width of the map game, start
-    official = if it's an official tournament match or not, bool
-    Return variables :
-    status = message to send on the channel, string
-    result = files to return on the channel, [string, string]
-    log1 = log file to send to player one, string
-    log2 = log file to send to player two, string
+    Function that takes in these parametes:
+    p1 = player one username (string)
+    p2 = player two username (string)
+    width = width of the map for battle (string)
+    height = height for the map for battle (string)
+    official = if battle is an official match (bool)
+    Function creates a queue in the db, the handler
+    stars the battle and here it keeps checking until
+    is finished ( or return a timout error ).
+    then returns the result of battle, the replay file,
+    the player individual logs
     """
 
     p1Name = p1.replace(' ', '')

@@ -5,6 +5,12 @@ from pymongo import MongoClient
 
 path = os.path.dirname(os.path.realpath(__file__))
 
+"""
+these will be hardcoded until we have
+a function to set everything up automatically.
+for more info about the database structure check
+../db
+"""
 username = urllib.parse.quote_plus('root')
 password = urllib.parse.quote_plus('')
 mongo = MongoClient('mongodb://%s:%s@localhost:27017/' % (username, password))

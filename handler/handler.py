@@ -8,6 +8,8 @@ import datetime
 import urllib.parse
 from pymongo import MongoClient
 
+#these will be hardcoded until we have
+#a function to set everything up automatically
 username = urllib.parse.quote_plus('arena')
 password = urllib.parse.quote_plus('')
 mongo = MongoClient('mongodb://%s:%s@localhost:27017/halite-tournaments' % (username, password))
@@ -76,12 +78,15 @@ def forrest(): #reference alert
 class BobTheBuilder(threading.Thread): #reference alert
 
     """
-    Thread class that builds the submission of a player.
-
-    self.bot = Name of the player that owns the bot (string)
-    self.log = The output that will be written in logfile (string)
-    self.comp = Command to compile the bot (string)
-    self.fire = Command to run the bot (string)
+    This Thread takes in the object from the queue,
+    finds the compiler and run information about
+    the player that submitted the code.
+    First it compiles the code, and if that's
+    executed properly it runs a game of halite
+    against the player's bot to test if
+    everything works properly.
+    Then it saves the output of the compiler and halite
+    into /env/out/
     """
 
     def __init__(self, q):
@@ -111,8 +116,9 @@ class BobTheBuilder(threading.Thread): #reference alert
                 self.log += str(e)
 
         self.fire = "cd "+self.path+" && "+self.fire
-        command = "/."+path+s.get('halite')+" -d \"240 160\" \""+self.fire+"\" \""+self.fire+"\" -t -i "+path+s.get('out')
+        command = "/."+path+s.get('halite')+" -d \"240 160\" \""+self.fire+"\" \""+self.fire+"\" -i "+path+s.get('out')
         self.log += "*****HALITE LOG*****\n"
+        success = False
 
         try:
             output = subprocess.check_output(command, timeout=120, shell=True).decode()
@@ -127,11 +133,9 @@ class BobTheBuilder(threading.Thread): #reference alert
 
         except subprocess.TimeoutExpired:
             self.log += "Timeout Error!\n"
-            success = False
 
         except subprocess.CalledProcessError as e:
             self.log += str(e)
-            success = False
 
         with open(path+s.get('out')+self.name+".txt", "w") as l :
             l.write(self.log)
@@ -149,16 +153,11 @@ class BobTheBuilder(threading.Thread): #reference alert
 class Arena(threading.Thread):
 
     """
-    Thread class that runs battles and matches.
-
-    self.p1 = Player one (string)
-    self.p2 = Player two (string)
-    self.official = If it's a match or just a battle (bool)
-    self.maps = All maps that we ran in, only if we are running a match (list of lists of string)
-    self.sizes = Width and height of current map (list of strings)
-    self.log = The output that will be written in logfile (string)
-    self.battles = The battles we are running in a match
-    self.results = All results of battles (list of lists of strings)
+    This Thread takes in the object from the queue,
+    retrieves the players in the battle/match from
+    the database, then it runs the halite command
+    and saves the replay and the output into the
+    env/out/ folder
     """
 
     def __init__(self, q):
@@ -266,6 +265,14 @@ class Arena(threading.Thread):
 
 
 class Handler(threading.Thread):
+
+    """
+    This Thread scans through the queue
+    and if it finds something in queue that
+    is "not-running" it starts up either
+    Arena, for battles, or BobTheBuilder for compiler
+    """
+
     def __init__(self):
         threading.Thread.__init__(self)
         self._stop_event = threading.Event()

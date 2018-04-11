@@ -15,10 +15,12 @@ commands = {"!help":"Show this message",
             "!matches":"Print upcoming matches, tag a user after to check his upcoming matches",
             "!submissions":"Check if submissions are opened/closed and when they close/open",
             "!languages":"Check supported languages for submissions, add a language name to know how it's compiled/run e.g. !language python",
-            "!battle":"Run a match between two players, !battle [p1] [p2] [height map] [width map]",
+            "!battle":"Run a match between two players, \n\t!battle [p1] [p2] [height map] [width map] [bet]\n\tYou can write \"bet\" at the end of the command to automatically create a bet on the game with Vegas\n",
             "!donations":"Get infos about donations",
             "!specs":"Check tournament specs",
-            "!engine":"Know how to get the engine of the current tournament"}
+            "!engine":"Know how to get the engine of the current tournament",
+            "!result":"Result [n of the battle], to show the results of battle with bet on",
+            "!results":"Show all the battles with bets that are still hidden"}
 
 adminCommands = {"!subs":"!subs True/False opens or closes submissions",
                  "!brk":"To add as a comment with the brackets image to update it",
@@ -29,31 +31,22 @@ adminCommands = {"!subs":"!subs True/False opens or closes submissions",
                  "!admin":"Print this message",
                  "!time":"Change time of submissions"}
 
-def check_args():
-    #if not settings.token or not settings.serverName or settings.handlerUser != "":
-        import argparse
-        import sys
-
-        parser = argparse.ArgumentParser(description="Arguments to enter if token or server name isn't present in settings.json")
-        parser.add_argument("-hP", "--handlerpass",
-                            help="The password for the user running enviroment, "\
-                            "not necessary if you don't have settings.handlerUser set",
-                            metavar="PASSWORD")
-        parser.add_argument("-mP", "--mongodbpass",
-                            help="Password for user root on mongo db",
-                            metavar="PASSWORD"),
-        parser.add_argument("-aP", "--arenaPassword",
-                            help="Password of the user arena on mongo db")
-
-        args = parser.parse_args(sys.argv[1:])
-
-        return args
-
+results = {}
+global res
+res = 0
+global haliteVegas
+haliteVegas = None
 
 @client.event
 async def on_ready(): #startup
     print("\nBot "+client.user.name+" ready to operate!")
     print("-------\n")
+    global haliteVegas
+    try:
+        haliteVegas = discord.utils.get(client.get_all_channels(), server__name=settings.serverName, name='halite-vegas')
+        print("\nInteraction with Vegas enabled")
+    except:
+        print("\nInteraction with Vegas not avaible")
 
 @client.event
 async def on_message(message):
@@ -152,10 +145,17 @@ async def on_message(message):
                     #get the two players from mentions
                     p1 = str(message.mentions[0])
                     p2 = str(message.mentions[1])
+                    bet = False
                     try :
                         #get the map sizes
                         width = message.content.split()[3]
                         height = message.content.split()[4]
+                        try:
+                            if message.content.split()[5] == "bet":
+                                bet = True
+
+                        except:
+                            pass
 
                     except ValueError: #if there is a problem set default size
                         width = "240"
@@ -163,11 +163,19 @@ async def on_message(message):
 
                     await client.send_message(message.channel, "*Running battle...* <:logo:416779058924355596>")
                     status, result, log1, log2, replay = await funcs.battle(p1, p2, width, height, False)
+                    global haliteVegas
+                    if haliteVegas != None and bet:
+                        await client.send_message(haliteVegas, "!create "+message.mentions[0].mention+" "+message.mentions[1].mention)
                     await client.send_message(message.channel, status)
 
                     if result != "": #if we have an output
+                        if haliteVegas != None and bet and status.startswith("**Battle ran successfully"):
+                            global res
+                            results.update({str(res):{"author":str(message.author), "result":result, "battle":p1+"VS"+p2}})
+                            result = "**Hiding results until bet isn't closed, check output and close with !result "+str(res)+"**"
+                            res += 1
                         await client.send_message(message.channel, result)
-                        if replay != "":
+                        if replay != "" and not bet:
                             await client.send_file(message.channel, replay)
                         #check if logs are present and send them
                         if log1 != "":
@@ -189,6 +197,38 @@ async def on_message(message):
             else: #tournament is closed
                 await client.send_message(message.channel, "**Feature not avaible at the moment!**")
 
+        elif message.content.startswith("!results"):
+            if len(results.items()) > 0:
+                text = "**Here are all battles open to bets!**\n```\n"
+                for num, r in results.items():
+                    text += "- Number : "+num+", battle is "+r.get("battle")+"\n"
+                text += "```"
+            else:
+                text = "**No battle with active bet at the moment!**"
+
+            await client.send_message(message.channel, text)
+
+        elif message.content.startswith("!result"):
+            try:
+                n = message.content.split()[1]
+
+                text = ""
+                for num, r in results.items():
+                    if r.get("author") == str(message.author) :
+                        if num == n:
+                            text = "**Here are the results of the battle n."+str(n)+":** \n"+r.get("result")
+                            del results[num]
+                            break
+                        else:
+                            text = "**No battle with bet for number "+str(n)+"**"
+
+                    else:
+                        text = "**No battle with bet created by you!**"
+
+                await client.send_message(message.channel, text)
+
+            except IndexError : #formatting error
+                await client.send_message(message.channel, "**Bad formatting! Run !help for info about commands**")
 
         elif message.content.startswith("!brackets"): #get current brackets
             if settings.onTour:
@@ -264,6 +304,8 @@ async def on_message(message):
                         p2 = str(message.mentions[1])
 
                         await client.send_message(message.channel, "*Running match...*")
+                        if haliteVegas != None:
+                            await client.send_message(haliteVegas, "!create "+message.mentions[0].mention+" "+message.mentions[1].mention)
                         status, result, _, _, replay = await funcs.battle(p1, p2, "", "", True)
                         await client.send_message(message.channel, status)
 
@@ -399,18 +441,19 @@ async def on_member_join(member):
 
 if __name__ == '__main__':
     try :
-        #check_args()
         print("Starting up handler...")
-        #running handler manually
-        #if settings.handlerUser != "":
-        #    command = "python3 "+settings.path+"/handler.py"
-        #    handler = subprocess.Popen("su -c \""+command+"\" -s /bin/sh "+settings.handlerUser, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
-        #    handler.communicate(args..encode())
-
-
+        #handler = subprocess.Popen("python3 "+settings.path+"/handler.py", shell=True)
         client.run(settings.token)
 
     except KeyboardInterrupt:
         print("\nExiting...")
-        handler.terminate()
+        #handler.terminate()
+        os._exit(1)
+
+    except discord.errors.LoginFailure:
+        if settings.token is None or settings.token == "":
+            print("\nYou need to register a token in the database!")
+        else:
+            print("\nToken insered is not valid!")
+        #handler.terminate()
         os._exit(1)

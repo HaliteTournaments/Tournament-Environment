@@ -18,6 +18,7 @@ Join our discord server : https://discord.gg/Q2nDHnn
 - mongodb-org
 - python3-discord (install through pip3)
 - python3-pymongo (install through pip3)
+- (all dependencies to compile the bots submissions)
 
 Run `install.sh` to automatically install the dependencies.
 
