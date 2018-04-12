@@ -363,12 +363,7 @@ async def on_message(message):
                 if s != "":
                     try:
                         boo = funcs.str_to_bool(s[0])
-                        with open(settings.path+"/settings.json", "r") as f:
-                            g = json.load(f)
-                            g.update({'submit':boo})
-
-                        with open(settings.path+"/settings.json", "w") as f:
-                            json.dump(g, f, indent="\t")
+                        settings.db.settings.update_one({}, {"$set":{"submit":boo}})
 
                         with open(settings.path+"/run.txt", "w") as f:
                             if boo:
@@ -389,13 +384,8 @@ async def on_message(message):
                 s = message.content.replace("!ontour", "").split()
                 if s != "":
                     boo = funcs.str_to_bool(s[0])
-                    with open(settings.path+"/settings.json", "r") as f:
-                        g = json.load(f)
-                        g.update({'onTour':boo})
 
-                    with open(settings.path+"/settings.json", "w") as f:
-                        json.dump(g, f, indent="\t")
-
+                    settings.db.settings.update_one({}, {"$set":{"onTour":boo}})
                     settings.onTour = boo
                     await client.send_message(message.channel, "**Setting : "+s[0]+" in onTour**")
 
@@ -412,13 +402,7 @@ async def on_message(message):
             elif message.content.startswith("!time"):
                 t = message.content.replace("!time", "")
                 if t != "":
-                    with open(settings.path+"/settings.json", "r") as f:
-                        g = json.load(f)
-                        g.update({'timeSub':t})
-
-                    with open(settings.path+"/settings.json", "w") as f:
-                        json.dump(g, f, indent="\t")
-
+                    settings.db.settings.update_one({}, {"$set":{"timeSub":t}})
                     settings.timeSub = t
                     await client.send_message(message.channel, "**Setting : "+t+" in timeSub**")
 
@@ -441,13 +425,12 @@ async def on_member_join(member):
 
 if __name__ == '__main__':
     try :
-        print("Starting up handler...")
-        #handler = subprocess.Popen("python3 "+settings.path+"/handler.py", shell=True)
+        handler = subprocess.Popen("python3 "+settings.path+"/handler.py", shell=True)
         client.run(settings.token)
 
     except KeyboardInterrupt:
         print("\nExiting...")
-        #handler.terminate()
+        handler.terminate()
         os._exit(1)
 
     except discord.errors.LoginFailure:
@@ -455,5 +438,5 @@ if __name__ == '__main__':
             print("\nYou need to register a token in the database!")
         else:
             print("\nToken insered is not valid!")
-        #handler.terminate()
+        handler.terminate()
         os._exit(1)

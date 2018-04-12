@@ -342,6 +342,7 @@ if __name__ == '__main__':
         if forrest(): #if we are running
             h = Handler()
             h.setName("hand")
+            print("Starting handler up...")
             h.start()
         else :
             print("Handler is not running... sad.")

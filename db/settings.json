@@ -1,7 +1,7 @@
 {
 	"compileOut": 245,
 	"server": "HaliteTournaments",
-	"submit": true,
+	"submit": false,
 	"onTour": true,
 	"matches": {},
 	"season": "2",
