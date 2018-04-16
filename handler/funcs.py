@@ -95,7 +95,10 @@ async def uploadBot(link, username, fileName):
                                 found = True
                                 lang = v
                                 if f.replace('MyBot.', '') == "py" and os.path.isfile(save+"requirements.txt"):
-                                    lib = os.popen("cd "+save+" && pip3 install "+save+"requirements.txt").read()
+                                    lib = os.popen("cd "+save+" && pip3 install -r "+save+"requirements.txt").read()
+
+                                elif r.replace('MyBot', '') == "js" and os.path.isfile(save+"package.json"):
+                                    lib = os.popen("cd "+save+" && npm install").read()
                                 break
 
 

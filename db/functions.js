@@ -1,6 +1,6 @@
 function giveCount(id){
   db.vegas.findAndModify({
-      query: {"_id":find},
+      query: {"_id":""},
       update: {
           $inc: {"count": 1},
       },

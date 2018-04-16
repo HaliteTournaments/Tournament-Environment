@@ -21,7 +21,6 @@ path = os.path.dirname(os.path.realpath(__file__))
 compileQueue = path+"/queues/compilerQueue.txt"
 runQueue = path+"/queues/runQueue.txt"
 mainQueue = path+"/queues/queue.txt"
-#runFile = path+"/run.txt"
 
 def log(string):
 

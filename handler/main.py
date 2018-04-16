@@ -263,6 +263,10 @@ async def on_message(message):
 
                         elif m[1] == "go":
                             t += "\n\n**External libraries have to be included in your zip file properly**"
+
+                        elif m[1] == "javascript":
+                            t+= "\n\n**External libraries installation command : **`npm install`, which requires a **package.json** file!"
+
                         break
 
                 if t == "":
