@@ -230,6 +230,9 @@ async def on_message(message):
             except IndexError : #formatting error
                 await client.send_message(message.channel, "**Bad formatting! Run !help for info about commands**")
 
+        elif message.content.startswith("!players"):
+            pass
+
         elif message.content.startswith("!brackets"): #get current brackets
             if settings.onTour:
                 try:
@@ -369,12 +372,6 @@ async def on_message(message):
                         boo = funcs.str_to_bool(s[0])
                         settings.db.settings.update_one({}, {"$set":{"submit":boo}})
 
-                        with open(settings.path+"/run.txt", "w") as f:
-                            if boo:
-                                f.write("1")
-                            else :
-                                f.write("0")
-
                         settings.submit = boo
                         await client.send_message(message.channel, "**Setting : "+s[0]+" in submissions**")
 
@@ -429,6 +426,7 @@ async def on_member_join(member):
 
 if __name__ == '__main__':
     try :
+        #Custom settings if you want to run handler on different user
         handler = subprocess.Popen("python3 "+settings.path+"/handler.py", shell=True)
         client.run(settings.token)
 

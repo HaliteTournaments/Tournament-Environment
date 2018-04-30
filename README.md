@@ -27,7 +27,7 @@ Run `install.sh` to automatically install the dependencies.
 - `ht.sh` - Bash file to start the environment
 - `install.sh` - Bash file to install dependencies
 - `imgs/` - Folder where we store images
-- `season-2/` - Folder with all season-2 related stuff
+- `season-3/` - Folder with all season-3 related stuff
 - `bots/` - Folder where bot submissions are stored in
 - `env/` - Folder with the game environment
 - `mongo/` - Folder to store database
@@ -74,6 +74,17 @@ He has access to all project folders.
 ## TODO
 
 - Add more languages support
+- Add suggestions from season-2:
+  ```
+  - Logs for make failures on submission
+  - A command to check who submitted
+  - Submissions available from DM
+  - Battle dimensions default
+  - Starter bot people can fight against
+  - A player should be able to battle against itself
+  - Include damage, ships created in log for battles
+  - Sending log files for matches
+  ```
 
 ## Contribute!
 
