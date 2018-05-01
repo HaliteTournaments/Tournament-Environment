@@ -36,7 +36,8 @@ engineLink = s.get('engineLink') #Link with info about engine
 handlerUser = s.get('handlerUser') #Username of the user that runs enviroment handler
 runs = int(s.get('runs')) #How many battles in a match
 
-#Emojis
-#<:logo:416779058924355596>
-#<:aspiringcoder:419920520901951508>
-#<:HTDollar:419938437831983144>
+emojis = {
+    "logo":"<:logo:416779058924355596>",
+    "aspiring":"<:aspiringcoder:419920520901951508>",
+    "dollar":"<:HTDollar:419938437831983144>"
+}

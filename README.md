@@ -74,6 +74,8 @@ He has access to all project folders.
 ## TODO
 
 - Add more languages support
+- Add support with HT-Backup
+- Add precompiled engine to `!engine` command
 - Add suggestions from season-2:
   ```
   - Logs for make failures on submission
@@ -85,6 +87,7 @@ He has access to all project folders.
   - Include damage, ships created in log for battles
   - Sending log files for matches
   ```
+- Add more emojis on the messages :wink:
 
 ## Contribute!
 

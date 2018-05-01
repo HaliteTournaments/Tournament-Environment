@@ -52,6 +52,21 @@ async def on_ready(): #startup
 async def on_message(message):
     try :
         if message.content.startswith("!submit"):
+
+            """
+            This command submits a player's bot when submissions
+            are opened. This command can be run in `battles`, `season-*`
+            and via PMs to the bot.
+            This command adds a queue to the handler, the handler then picks
+            up the queue from the database and :
+                - Checks if it's a valid submission
+                - If the user isn't already running something
+                - Installs external libraries (if required)
+                - Compiles the code (if required)
+                - Runs a test game against itself to make sure it works
+                - Sends logs and compiler outputs via DM to the player
+            """
+
             if not settings.submit : #if the submissions are closed
                 await client.delete_message(message)
                 await client.send_message(message.channel, "**Submissions are closed at the moment!** "+message.author.mention)
@@ -74,13 +89,26 @@ async def on_message(message):
 
 
         elif message.content.startswith("!submissions"): #check submissions
+
+            """
+            This command shows the current status of submissions.
+            Depending on the status the message changes, this command
+            also shows when the submissions will close/open
+            """
+
             if settings.submit:
                 s, s2 = "opened", "close"
             else :
                 s, s2 = "closed", "open"
-            await client.send_message(message.channel, "**Current status of submissions : "+s+", the submissions will "+s2+" at : "+settings.timeSub+"**")
+            await client.send_message(message.channel, "**Current status of submissions : "+s+", the submissions will "+s2+" : "+settings.timeSub+"**")
 
         elif message.content.startswith("!help"): #help function
+
+            """
+            This command simply prints the name of all
+            other commands with a brief explaination
+            """
+
             text = "```\n"
             for k,c in sorted(commands.items()):
                 text += k + " : " + c + "\n"
@@ -88,6 +116,12 @@ async def on_message(message):
             await client.send_message(message.channel, text)
 
         elif message.content.startswith("!rules"): #print info about the tournament
+
+            """
+            This command prints all the information about the
+            tournament such as : dates, rules and prizes
+            """
+
             if settings.onTour:
                 try :
                     with open(settings.infos, "r") as f:
@@ -102,6 +136,14 @@ async def on_message(message):
 
 
         elif message.content.startswith("!matches"): #check upcoming matches
+
+            """
+            This command allows everyone to check the upcoming
+            matches. A player can also run :
+                !matches @Splinter
+            And this will return all the games that Splinter is in
+            """
+
             if settings.onTour: #if we are running in a tournament
                 m = str(message.content).split()
                 if len(m) == 1: #check all matches
@@ -139,12 +181,32 @@ async def on_message(message):
             await client.send_message(message.channel, text)
 
         elif message.content.startswith("!battle"):
+
+            """
+            This command allows the players to battle against
+            themselves whenever they want when there's an ongoing
+            tournament. This feature is to allow the players to
+            try out the game environment and debug their bots
+            properly.
+            It also has an integration with our bot Vegas which
+            allows the player to hide the results and then
+            close the bets for a certain game.
+            Example of a command :
+                !battle @Splinter @FrankWhoee 292 180 bet
+            This command starts a game between FrankWhoee and Splinter
+            with a map size of 292x180, also setting up a bet.
+            """
+
             #if we are in a tournament and in the right channel
             if settings.onTour and str(message.channel) == "battles" :
                 try:
                     #get the two players from mentions
                     p1 = str(message.mentions[0])
-                    p2 = str(message.mentions[1])
+                    try:
+                        p2 = str(message.mentions[1])
+                    except :
+                        p2 = str(message.mentions[0])
+
                     bet = False
                     try :
                         #get the map sizes
@@ -157,7 +219,8 @@ async def on_message(message):
                         except:
                             pass
 
-                    except ValueError: #if there is a problem set default size
+                    except : #if there is a problem set default size
+                        await client.send_message(message.channel, "*Using default size map : 240x160*")
                         width = "240"
                         height = "160"
 
@@ -166,6 +229,7 @@ async def on_message(message):
                     global haliteVegas
                     if haliteVegas != None and bet:
                         await client.send_message(haliteVegas, "!create "+message.mentions[0].mention+" "+message.mentions[1].mention)
+
                     await client.send_message(message.channel, status)
 
                     if result != "": #if we have an output
@@ -174,14 +238,18 @@ async def on_message(message):
                             results.update({str(res):{"author":str(message.author), "result":result, "battle":p1+"VS"+p2}})
                             result = "**Hiding results until bet isn't closed, check output and close with !result "+str(res)+"**"
                             res += 1
+
                         await client.send_message(message.channel, result)
+
                         if replay != "" and not bet:
                             await client.send_file(message.channel, replay)
+
                         #check if logs are present and send them
                         if log1 != "":
                             await client.send_message(message.mentions[0], "**Here is the logfile of your bot : (timstamp battle : "+funcs.getTime()+")**")
                             await client.send_file(message.mentions[0], log1)
                             os.remove(log1)
+
                         if log2 != "":
                             await client.send_message(message.mentions[1], "**Here is the logfile of your bot : (timstamp battle : "+funcs.getTime()+")**")
                             await client.send_file(message.mentions[1], log2)
@@ -198,6 +266,12 @@ async def on_message(message):
                 await client.send_message(message.channel, "**Feature not avaible at the moment!**")
 
         elif message.content.startswith("!results"):
+
+            """
+            Command to show all the battles that are
+            opened to bets.
+            """
+
             if len(results.items()) > 0:
                 text = "**Here are all battles open to bets!**\n```\n"
                 for num, r in results.items():
@@ -209,6 +283,13 @@ async def on_message(message):
             await client.send_message(message.channel, text)
 
         elif message.content.startswith("!result"):
+
+            """
+            Command to show the result of a battle
+            opened to bets, and close the bets
+            """
+            #TODO Add vegas interaction
+
             try:
                 n = message.content.split()[1]
 
@@ -231,9 +312,21 @@ async def on_message(message):
                 await client.send_message(message.channel, "**Bad formatting! Run !help for info about commands**")
 
         elif message.content.startswith("!players"):
+
+            """
+            This command allows to see all the players
+            partecipating in this season and their submission
+            status. (submitted/not)
+            """
+
             pass
 
         elif message.content.startswith("!brackets"): #get current brackets
+
+            """
+            Sends the current brackets for the season
+            """
+
             if settings.onTour:
                 try:
                     await client.send_file(message.channel, settings.brackets)
@@ -245,6 +338,16 @@ async def on_message(message):
                 await client.send_message(message.channel, "**No tournament currently ongoing!**")
 
         elif message.content.startswith("!languages"): #send all supported languages
+
+            """
+            This command outputs all the languages that are
+            currently supported. To check in specific a language :
+                !languages python
+            This will output the command used to compile the player's code,
+            the command used to install the external libraries and
+            the command used to run a test game
+            """
+
             m = message.content.split()
             if len(m) == 1:
                 t = "**Here are the languages supported for your bot:**\n\n"
@@ -278,10 +381,23 @@ async def on_message(message):
             await client.send_message(message.channel, t)
 
         elif message.content.startswith("!donations"):
+
+            """
+            This command prints information on how to
+            donate to this project
+            """
+
             text = "Donations are used to help support Halite Tournaments. We use your contributions to run our servers and give cash prizes. Donate here: https://www.paypal.me/HaliteTournaments. Donating will give you the **Contributor** role which has access to the Contributors voice channel. More privileges for Contributors will be coming!"
             await client.send_message(message.channel, text)
 
         elif message.content.startswith("!specs"):
+
+            """
+            This command prints the specs for the current
+            season like : constants, map sizes and environment
+            changes.
+            """
+
             try :
                 with open(settings.specs, "r") as s:
                     text = s.read()
@@ -292,18 +408,47 @@ async def on_message(message):
             await client.send_message(message.channel, text)
 
         elif message.content.startswith("!engine"):
-            if settings.engineLink != "":
+
+            """
+            This will give the players access to the code
+            of the Halite environment used in the ongoing
+            tournament. It will also give away a percompiled
+            version of it.
+            """
+            #TODO Add precompiled options
+
+            if settings.engineLink != "" and settings.onTour:
                 await client.send_message(message.channel, "**Here is the link containing the info for the engine : "+settings.engineLink+"**")
             else:
                 await client.send_message(message.channel, "**Link still not avaible!**")
 
         #admin commands
         elif str(message.author) in settings.admins:
+
+            """
+            This commands are only avaible for the members
+            in the `admins` group
+            """
+
             if message.content.startswith("!type"): #make bot type in current channel
+
+                """
+                This will send a message from HTBot
+                """
+
                 await client.delete_message(message)
                 await client.send_message(message.channel, str(message.content).replace("!type", ""))
 
             elif message.content.startswith("!match"):
+
+                """
+                This command starts an official tournament match,
+                if Vegas interaction is enabled it will also create
+                a bet between the two players.
+                This command will output the outcome of the games and
+                a zip file containing all replays of the games run in the match
+                """
+
                 if settings.onTour :
                     try:
                         #get the two players from mentions
@@ -328,6 +473,11 @@ async def on_message(message):
                     await client.send_message(message.channel, "**Feature not avaible at the moment!**")
 
             elif message.content.startswith("!admin"): #print admin commands
+
+                """
+                A help command for admins
+                """
+
                 text = "```\n"
                 for k,c in sorted(adminCommands.items()):
                     text += k + " : " + c + "\n"
@@ -335,6 +485,14 @@ async def on_message(message):
                 await client.send_message(message.channel, text)
 
             elif message.content.startswith("!clear"): #delete n messages in a channel
+
+                """
+                This command allows to delete x messages in a y channel
+                E.g :
+                    !clear 20 battles
+                Will delete 20 messages in the battles channel
+                """
+
                 try :
                     n = int(message.content.split()[1]) #number of messages
                     ch = message.content.split()[2] #channel
@@ -348,6 +506,12 @@ async def on_message(message):
                     await client.send_message(discord.utils.get(client.get_all_channels(), server__name=settings.serverName, name='halite'), "**Wrong command formatting**")
 
             elif message.content.startswith("!post"): #upload a file from server to channel
+
+                """
+                This will upload a file from the server to the channel
+                wanted.
+                """
+
                 try :
                     await client.delete_message(message)
                     c = message.content.replace("!post", "")
@@ -366,6 +530,14 @@ async def on_message(message):
                     await client.send_message(discord.utils.get(client.get_all_channels(), server__name=settings.serverName, name='halite'), "**Wrong command formatting**")
 
             elif message.content.startswith("!subs"): #change submissions status
+
+                """
+                This command will change the submissions status
+                E.g. :
+                    !subs False
+                Will close the submissions
+                """
+
                 s = message.content.replace("!subs", "").split()
                 if s != "":
                     try:
@@ -382,6 +554,12 @@ async def on_message(message):
                     await client.send_message(message.channel, "!submissions")
 
             elif message.content.startswith("!ontour"): #chane onTour status
+
+                """
+                This command will change the onTour status,
+                same as !subs
+                """
+
                 s = message.content.replace("!ontour", "").split()
                 if s != "":
                     boo = funcs.str_to_bool(s[0])
@@ -394,6 +572,12 @@ async def on_message(message):
                     await client.send_message(message.channel, "**Invalid command**")
 
             elif message.content.startswith("!brk"): #upload new file to brackets
+
+                """
+                This command will update the brackets, like !submit
+                this command has to be run as a comment on the file
+                """
+
                 try :
                     os.system('wget -q -O '+settings.brackets+' ' + message.attachments[0].get('url'))
                     await client.send_message(message.channel, "**Brackets updated**")
@@ -401,6 +585,11 @@ async def on_message(message):
                     await client.send_message(message.channel, "**Error while uploading the brackets**")
 
             elif message.content.startswith("!time"):
+
+                """
+                This command will change the submissions time
+                """
+
                 t = message.content.replace("!time", "")
                 if t != "":
                     settings.db.settings.update_one({}, {"$set":{"timeSub":t}})
