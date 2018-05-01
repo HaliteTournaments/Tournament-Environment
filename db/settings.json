@@ -1,0 +1,19 @@
+{
+	"server": "HaliteTournaments",
+	"submit": false,
+	"onTour": false,
+	"matches": {},
+	"season": "3",
+	"specs": "",
+	"log": "bot.log",
+	"brackets": "imgs/brackets.png",
+	"infos": "",
+	"timeSub": "",
+	"engineLink": "",
+	"token": "",
+	"admins": [
+		"Splinter#4298",
+		"Frank Whoee#1338"
+	],
+	"runs":5
+}

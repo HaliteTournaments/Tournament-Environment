@@ -1,0 +1,9 @@
+{
+  "role":"arena",
+  "privileges":[
+    {"resource":{"db":"halite-tournaments", "collection":"players"}, "actions":["find", "update"]},
+    {"resource":{"db":"halite-tournaments", "collection":"queues"}, "actions":["find", "update", "insert"]},
+    {"resource":{"db":"halite-tournaments", "collection":"arena"}, "actions":["find", "update"]}
+  ],
+  "roles": []
+}

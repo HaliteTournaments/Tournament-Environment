@@ -11,40 +11,59 @@ community, which is where we organize and run all our tournaments.
 
 Join our discord server : https://discord.gg/Q2nDHnn
 
-## Setup
+## Dependencies
 
-The server used for our tournaments is a Google Cloud instance running Debian 9.
-All the packages needed to run this are in `./install.sh`.
+- python3
+- python3-pip
+- mongodb-org
+- python3-discord (install through pip3)
+- python3-pymongo (install through pip3)
+- (all dependencies to compile the bots submissions)
 
-## Game environment
-
-For security reasons we compile and run the code submitted by the
-participants of the tournaments in a Vagrant machine.
-
-Before setting up your Vagrant environment you need to follow the steps
-at : https://cloud.google.com/compute/docs/instances/enable-nested-virtualization-vm-instances
-in order to enable virtualization on your instance.
-
-When you have installed all packages needed, head over to `env/README.md`
-for the overview of the game environment
-
-Check out `season-2/` for more infos on our current battle system
+Run `install.sh` to automatically install the dependencies.
 
 ## Files
 
-- `bot.py` - Main of the discord bot
-- `funcs.py` - Helper functions and functions interacting with game environment
-- `install.sh` - Bash script to install all packages needed
-- `settings.json` - JSON file containing all environment variables
-- `setting.py` - Script that loads the environment variables
-- `bot.log` - Logfile for discord bot
+- `ht.sh` - Bash file to start the environment
+- `install.sh` - Bash file to install dependencies
+- `imgs/` - Folder where we store images
+- `season-3/` - Folder with all season-3 related stuff
+- `bots/` - Folder where bot submissions are stored in
+- `env/` - Folder with the game environment
+- `mongo/` - Folder to store database
+- `db/` - Containing templates for db setup
 
-## Disclaimer
+## Security
 
-This is v1.0, don't expect the code to be nice and clean  :stuck_out_tongue_winking_eye:
-It gets the job done, but we would love external help and we want our
-community to grow so feel free to create issues and join our discord
-server! :smile:
+Since we are compiling and executing untrusted code we setted up
+security measures to protect our server.
+Some of them are mandatory to setup, so if you wanna run this
+code on your own server you will have to follow them, others are
+optional.
+
+#### Database
+As database to store the data about our players, settings and matches
+we use MongoDB. The user are setted up to be one `root` which has
+complete access to the `halite-tournaments` database, and the other
+one called `arena`, which is the user that only has access to matches
+and players. You should check the folder `db/` for more info about
+the roles and the users.
+
+#### Running the program
+The discord bot is run by a user which has to provide his password to
+become sudo ( very recommended ). The other user is the user `arena`
+which is the one that compiles the code for the bots and runs the
+matches.
+
+#### Users
+The user `arena` **does not** have internet access, to limit
+all the possible damage that could be done if malicious code
+is contained in the code for the bots. `arena` also has restricted
+access to the project folder ( it is recommended ), you can set the
+permissions up as you wish.
+The user running the discord bot is allowed internet access of course
+and is in charge of installing dependencies for the bots as well.
+He has access to all project folders.
 
 ## Future
 
@@ -55,8 +74,24 @@ server! :smile:
 ## TODO
 
 - Add more languages support
+- Add support with HT-Backup
+- Add precompiled engine to `!engine` command
+- Add suggestions from season-2:
+  ```
+  - Logs for make failures on submission
+  - A command to check who submitted
+  - Submissions available from DM
+  - Battle dimensions default
+  - Starter bot people can fight against
+  - A player should be able to battle against itself
+  - Include damage, ships created in log for battles
+  - Sending log files for matches
+  ```
+- Add more emojis on the messages :wink:
 
 ## Contribute!
+
+Please help us improve this code! We would love to hear your opinion!
 
 Join our discord server and help our community grow !
 

@@ -1,0 +1,16 @@
+{
+  "user":"root",
+  "pwd":"",
+  "roles" : [
+    {"role":"userAdminAnyDatabase", "db":"admin"},
+    {"role":"root", "db":"admin"}
+  ]
+}
+
+{
+  "user":"arena",
+  "pwd":"",
+  "roles" : [
+    {"role":"arena", "db":"halite-tournaments"}
+  ]
+}
